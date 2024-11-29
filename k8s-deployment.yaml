@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expensetracker-deployment
+spec:
+  selector:
+    matchLabels:
+      app: spring-boot-k8s
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: spring-boot-k8s
+    spec:
+      containers:
+        - name: expensetracker-container
+          image: 'javatechie/expense-tracker:1732884603'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9191
