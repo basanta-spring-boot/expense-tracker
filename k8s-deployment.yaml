@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: expensetracker-container
-          image: 'javatechie/expense-tracker:1732884603'
+          image: 'javatechie/expense-tracker:latest'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
