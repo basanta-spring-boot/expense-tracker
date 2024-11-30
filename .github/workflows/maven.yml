@@ -63,8 +63,8 @@ jobs:
 
       - name: Apply Kubernetes Deployment and Service
         run: |
-          kubectl apply -f k8s-deployment.yaml
-          kubectl apply -f k8s-service.yaml
+          kubectl apply -f ./k8s-deployment.yaml
+          kubectl apply -f ./k8s-service.yaml
 
       - name: Expose application (optional)
         run: |
