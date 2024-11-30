@@ -1,6 +1,3 @@
-# CI/CD pipeline for expense-tracker using GitHub Actions
-# Builds the Java project, creates a Docker image, and deploys to Minikube
-
 name: expense-tracker-cicd
 
 on:
@@ -13,13 +10,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Check out the code
       - name: Check out code
         uses: actions/checkout@v2
         with:
           ref: main
 
-      # Step 2: Set up JDK
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -27,11 +22,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Step 3: Build the project with Maven
       - name: Build with Maven
         run: mvn clean install
 
-      # Step 4: Build and push Docker image
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
@@ -46,50 +39,39 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      # Step 1: Check out the code again for deploy
       - name: Check out code
         uses: actions/checkout@v2
         with:
-          ref: main  # Ensure correct branch
+          ref: main
 
-      # Step 2: Set up kubectl
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
-      # Step 3: Set up Minikube (Local)
       - name: Set up Minikube (Local)
         run: |
-          minikube start --driver=docker
+          minikube start --driver=docker --cpus=2 --memory=4g
+          eval $(minikube -p minikube docker-env)
           kubectl config use-context minikube
 
-      # Step 4: Apply Kubernetes Deployment and Service
       - name: Apply Kubernetes Deployment and Service
         run: |
           kubectl apply -f ./k8s-deployment.yaml --validate=false
           kubectl apply -f ./k8s-service.yaml --validate=false
 
-      # Step 5: Debug Minikube and Kubernetes Resources
+      - name: Wait for pods to be running
+        run: |
+          kubectl rollout status deployment/expensetracker-deployment --timeout=300s
+          kubectl get pods
+          kubectl get pods -o wide
+
       - name: Debug Minikube and Kubernetes Resources
         run: |
-          # Get the list of pods to check if any are running
-          kubectl get pods
-
-          # Get detailed information about the pods
-          kubectl get pods -o wide
-          
-          # Describe the deployment to find any issues with pods or containers
           kubectl describe deployment expensetracker-deployment
-          
-          # Describe the pod(s) based on label selector to find out more details
           kubectl describe pod -l app=spring-boot-k8s
-          
-          # View logs of the pod(s) to troubleshoot issues
           kubectl logs -l app=spring-boot-k8s
-
-          # Get the minikube logs for more information
           minikube logs --file=minikube-logs.txt
 
-      # Step 6: Expose application (optional)
-      - name: Expose application (optional)
+      - name: Wait for service to be available
         run: |
+          kubectl wait --for=condition=available --timeout=300s deployment/expensetracker-deployment
           minikube service expensetracker-service --url || echo "Service not yet available"
