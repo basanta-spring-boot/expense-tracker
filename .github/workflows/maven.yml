@@ -27,9 +27,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Step 3: List files for debugging
-      - name: List files
-        run: ls -R
 
       # Step 4: Build the project with Maven
       - name: Build with Maven
@@ -55,12 +52,6 @@ jobs:
         with:
           ref: main  # Ensure correct branch
 
-      - name: Verify files in the working directory
-        run: |
-          pwd
-          ls -la
-          ls -R
-
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
@@ -69,16 +60,13 @@ jobs:
           minikube start --driver=docker
           kubectl config use-context minikube
 
-      - name: Debug file presence
-        run: |
-          if [ -f ./k8s-deployment.yaml ]; then
-            echo "k8s-deployment.yaml exists."
-          else
-            echo "k8s-deployment.yaml is missing!"
-            exit 1
-          fi
 
       - name: Apply Kubernetes Deployment and Service
         run: |
           kubectl apply -f ./k8s-deployment.yaml --validate=false
           kubectl apply -f ./k8s-service.yaml --validate=false
+
+      # Step 6: Expose application (optional)
+      - name: Expose application (optional)
+        run: |
+          minikube service expensetracker-service --url
