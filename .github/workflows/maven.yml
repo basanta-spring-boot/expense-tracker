@@ -57,13 +57,18 @@ jobs:
           kubectl apply -f ./k8s-deployment.yaml --validate=false
           kubectl apply -f ./k8s-service.yaml --validate=false
 
+
+      - name: Debug Minikube and Kubernetes Resources
+        run: |
+          kubectl describe deployment expensetracker-deployment
+          kubectl describe pod -l app=spring-boot-k8s
+          kubectl logs -l app=spring-boot-k8s
+          minikube logs --file=minikube-logs.txt
+          kubectl get pods
+          minikube ip
+          kubectl get nodes -o wide
+
       - name: Wait for service to be available
         run: |
           kubectl wait --for=condition=available --timeout=300s deployment/expensetracker-deployment
           minikube service expensetracker-service --url || echo "Service not yet available"
-
-      - name: Port Forward to Access Service
-        run: |
-          kubectl port-forward svc/expensetracker-service 8080:9090 &
-          sleep 10  # Wait for the forwarding to stabilize
-          curl -f http://localhost:8080 || echo "Service not reachable"
