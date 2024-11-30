@@ -58,6 +58,11 @@ jobs:
           kubectl apply -f ./k8s-deployment.yaml --validate=false
           kubectl apply -f ./k8s-service.yaml --validate=false
 
+      - name: Wait for pods to be running
+        run: |
+          kubectl rollout status deployment/expensetracker-deployment --timeout=300s
+          kubectl get pods
+          kubectl get pods -o wide
 
       - name: Debug Minikube and Kubernetes Resources
         run: |
@@ -66,7 +71,7 @@ jobs:
           kubectl logs -l app=spring-boot-k8s
           minikube logs --file=minikube-logs.txt
           kubectl get pods
-                    minikube ip
+          minikube ip
           kubectl get nodes -o wide
 
       - name: Wait for service to be available
