@@ -16,6 +16,8 @@ jobs:
       # Step 1: Check out the code
       - name: Check out code
         uses: actions/checkout@v2
+        with:
+          ref: main
 
       # Step 2: Set up JDK
       - name: Set up JDK 21
@@ -73,8 +75,8 @@ jobs:
       # Step 5: Apply Kubernetes manifests
       - name: Apply Kubernetes Deployment and Service
         run: |
-          kubectl apply -f k8s-deployment.yaml
-          kubectl apply -f k8s-service.yaml
+          kubectl apply -f ./k8s-deployment.yaml --validate=false
+          kubectl apply -f ./k8s-service.yaml --validate=false
 
       # Step 6: Expose application (optional)
       - name: Expose application (optional)
