@@ -50,35 +50,35 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      # Step 1: Set up kubectl
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          ref: main  # Ensure correct branch
+
+      - name: Verify files in the working directory
+        run: |
+          pwd
+          ls -la
+          ls -R
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
-      # Step 2: Set up and start Minikube
       - name: Set up Minikube (Local)
         run: |
           minikube start --driver=docker
           kubectl config use-context minikube
 
-      # Step 3: Verify Minikube status and configuration
-      - name: Verify Minikube setup
+      - name: Debug file presence
         run: |
-          minikube status
-          kubectl get nodes
+          if [ -f ./k8s-deployment.yaml ]; then
+            echo "k8s-deployment.yaml exists."
+          else
+            echo "k8s-deployment.yaml is missing!"
+            exit 1
+          fi
 
-      # Step 4: Verify working directory and list files
-      - name: Verify working directory and list files
-        run: |
-          pwd
-          ls -la
-
-      # Step 5: Apply Kubernetes manifests
       - name: Apply Kubernetes Deployment and Service
         run: |
           kubectl apply -f ./k8s-deployment.yaml --validate=false
           kubectl apply -f ./k8s-service.yaml --validate=false
-
-      # Step 6: Expose application (optional)
-      - name: Expose application (optional)
-        run: |
-          minikube service expensetracker-service --url
