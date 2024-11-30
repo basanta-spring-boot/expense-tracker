@@ -70,6 +70,7 @@ jobs:
           kubectl describe pod -l app=spring-boot-k8s
           kubectl logs -l app=spring-boot-k8s
           minikube logs --file=minikube-logs.txt
+          kubectl get pods
 
       - name: Wait for service to be available
         run: |
