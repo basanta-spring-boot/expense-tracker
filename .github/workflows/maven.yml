@@ -68,12 +68,11 @@ jobs:
 
       - name: Debug Minikube and Kubernetes Resources
         run: |
-          minikube status
-          kubectl get nodes
+          kubectl get pods
           kubectl get pods -o wide
-          kubectl get svc -o wide
-          kubectl describe deployment expensetracker-deployment
-          kubectl describe svc expensetracker-service
+          kubectl describe pod -l app=spring-boot-k8s
+          kubectl logs -l app=spring-boot-k8s
+          minikube logs --file=minikube-logs.txt
 
       # Step 6: Expose application (optional)
       - name: Expose application (optional)
