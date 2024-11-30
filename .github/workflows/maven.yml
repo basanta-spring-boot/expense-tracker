@@ -1,10 +1,5 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# CI/CD pipeline for expense-tracker using GitHub Actions
+# Builds the Java project, creates a Docker image, and deploys to Minikube
 
 name: expense-tracker-cicd
 
@@ -16,56 +11,72 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
+      # Step 1: Check out the code
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: List files
-      run: ls -R
+      # Step 2: Set up JDK
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Build with Maven
-      run: mvn clean install
+      # Step 3: List files for debugging
+      - name: List files
+        run: ls -R
 
-    - uses: mr-smithers-excellent/docker-build-push@v6
-      name: Build & push Docker image
-      with:
-        image: javatechie/expense-tracker
-        tags: latest
-        registry: docker.io
-        dockerfile: Dockerfile
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      # Step 4: Build the project with Maven
+      - name: Build with Maven
+        run: mvn clean install
+
+      # Step 5: Build and push Docker image
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: javatechie/expense-tracker
+          tags: latest
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      # Step 1: Set up kubectl
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
+      # Step 2: Set up and start Minikube
       - name: Set up Minikube (Local)
         run: |
-          minikube start
+          minikube start --driver=docker
           kubectl config use-context minikube
 
+      # Step 3: Verify Minikube status and configuration
+      - name: Verify Minikube setup
+        run: |
+          minikube status
+          kubectl get nodes
+
+      # Step 4: Verify working directory and list files
       - name: Verify working directory and list files
         run: |
           pwd
           ls -la
 
+      # Step 5: Apply Kubernetes manifests
       - name: Apply Kubernetes Deployment and Service
         run: |
           kubectl apply -f ./k8s-deployment.yaml
           kubectl apply -f ./k8s-service.yaml
 
+      # Step 6: Expose application (optional)
       - name: Expose application (optional)
         run: |
           minikube service expensetracker-service --url
