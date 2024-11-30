@@ -49,8 +49,7 @@ jobs:
 
       - name: Set up Minikube (Local)
         run: |
-          minikube start --driver=docker --cpus=2 --memory=4g
-          eval $(minikube -p minikube docker-env)
+          minikube start --driver=hyperkit
           kubectl config use-context minikube
 
       - name: Apply Kubernetes Deployment and Service
