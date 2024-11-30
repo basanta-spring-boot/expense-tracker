@@ -56,6 +56,11 @@ jobs:
           minikube start
           kubectl config use-context minikube
 
+      - name: Verify working directory and list files
+        run: |
+          pwd
+          ls -la
+
       - name: Apply Kubernetes Deployment and Service
         run: |
           kubectl apply -f k8s-deployment.yaml
