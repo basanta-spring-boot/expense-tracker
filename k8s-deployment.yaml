@@ -3,10 +3,10 @@ kind: Deployment
 metadata:
   name: expensetracker-deployment
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: spring-boot-k8s
-  replicas: 4
   template:
     metadata:
       labels:
@@ -14,7 +14,6 @@ spec:
     spec:
       containers:
         - name: expensetracker-container
-          image: 'javatechie/expense-tracker:latest'
-          imagePullPolicy: IfNotPresent
+          image: javatechie/expense-tracker:latest
           ports:
             - containerPort: 8080
