@@ -50,6 +50,7 @@ jobs:
       - name: Set up Minikube (Local)
         run: |
           minikube start --driver=docker
+          eval $(minikube -p minikube docker-env)
           kubectl config use-context minikube
 
       - name: Apply Kubernetes Deployment and Service
@@ -65,7 +66,7 @@ jobs:
           kubectl logs -l app=spring-boot-k8s
           minikube logs --file=minikube-logs.txt
           kubectl get pods
-          minikube ip
+                    minikube ip
           kubectl get nodes -o wide
 
       - name: Wait for service to be available
