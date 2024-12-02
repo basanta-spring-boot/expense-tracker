@@ -52,7 +52,10 @@ jobs:
 
       # Step 3: Set up Kubeconfig from secrets (ensure your Kubeconfig is set up in GitHub secrets)
       - name: Set up Kubeconfig
-        run: echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+        run: |
+          mkdir -p $HOME/.kube  # Ensure the directory exists
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config  # Write the kubeconfig
+          chmod 600 $HOME/.kube/config  # Secure the config file
 
       # Step 4: Deploy to Kubernetes
       - name: Deploy to Kubernetes
