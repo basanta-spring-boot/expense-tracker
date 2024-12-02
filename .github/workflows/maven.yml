@@ -56,9 +56,11 @@ jobs:
           mkdir -p $HOME/.kube  # Ensure the directory exists
           echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config  # Write the kubeconfig
           chmod 600 $HOME/.kube/config  # Secure the config file
+#        env:
+#          KUBECONFIG: ${{ secrets.KUBECONFIG }}
 
       # Step 4: Deploy to Kubernetes
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f k8s-deployment.yaml
-          kubectl apply -f k8s-service.yaml
+          kubectl apply -f k8s-deployment.yaml --validate=false
+          kubectl apply -f k8s-service.yaml --validate=false
